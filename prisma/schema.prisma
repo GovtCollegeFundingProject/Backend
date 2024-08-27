@@ -1,0 +1,94 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+model User {
+  email                 String         @id @unique
+  password              String
+  role                  Role
+  phoneNumber           String
+  whatsappCompatible    Boolean
+  createdOn             DateTime       @default(now())
+  taxExemptionRequired  Boolean
+  anonymous             Boolean
+
+  // Relations
+  individual            Individual?    // One-to-one relation with Individual
+  company               Company?       // One-to-one relation with Company
+  transactions          Transaction[]  // One-to-many relation with Transactions
+}
+
+enum Role {
+  ADMIN
+  INDIVIDUAL
+  COMPANY
+  STAFF
+}
+
+model Individual {
+  email                 String   @id @unique
+  aadhar                String?  // Nullable
+  pan                   String?  // Nullable
+  salutation            String   // Mr, Mrs, Ms, Dr
+  name                  String
+  residency             String?
+
+  // Relations
+  user                  User     @relation(fields: [email], references: [email])
+}
+
+model Company {
+  email                 String   @id @unique
+  companyID             String
+  name                  String
+  pan                   String?
+  salutation            String   // Mr, Mrs, Ms, Dr
+  contactPersonName     String
+
+  // Relations
+  user                  User     @relation(fields: [email], references: [email])
+}
+
+model Transaction {
+  transactionID         String       @id @default(uuid())
+  email                 String
+  collegeType           CollegeType
+  amount                Float
+  transactionType       TransactionType
+  transactionTime       DateTime     @default(now())
+
+  // Relations
+  transactionUser       User         @relation(fields: [email], references: [email])
+  collegeId             Int?         // Nullable for general donations
+  college               College?     @relation(fields: [collegeId], references: [collegeId])
+}
+
+enum CollegeType {
+  GENERAL
+  SPECIFIC
+}
+
+enum TransactionType {
+  NET
+  UPI
+  CREDIT
+  DEBIT
+}
+
+model College {
+  collegeId             Int          @id @default(autoincrement())
+  collegeName           String
+  district              String
+  amount                Float?       // Nullable, used for specific donations
+  transactionType       TransactionType
+  transactionTime       DateTime     @default(now())
+
+  // Relations
+  transactions          Transaction[]  // One-to-many relation with Transactions
+}
