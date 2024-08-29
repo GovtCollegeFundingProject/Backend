@@ -17,6 +17,7 @@ model User {
   createdOn             DateTime       @default(now())
   taxExemptionRequired  Boolean
   anonymous             Boolean
+  isEmailVerified       Boolean  @default(false) // Add this field to track email verification
 
   // Relations
   individual            Individual?    // One-to-one relation with Individual
@@ -29,6 +30,7 @@ enum Role {
   INDIVIDUAL
   COMPANY
   STAFF
+
 }
 
 model Individual {
@@ -85,10 +87,9 @@ model College {
   collegeId             Int          @id @default(autoincrement())
   collegeName           String
   district              String
-  amount                Float?       // Nullable, used for specific donations
-  transactionType       TransactionType
-  transactionTime       DateTime     @default(now())
-
+  address               String
+  email                 String
+  collegeType           String
   // Relations
   transactions          Transaction[]  // One-to-many relation with Transactions
 }
