@@ -1,7 +1,10 @@
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
+const bcryptPassword = require("bcrypt");
 const crypto = require("crypto");
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 require("dotenv").config();
 
 const OTP_EXPIRATION_TIME = 5 * 60 * 1000; // 5 minutes
@@ -17,17 +20,17 @@ const transporter = nodemailer.createTransport({
 });
 
 // Generate OTP
-function generateOtp() {
+async function generateOtp() {
   return crypto.randomInt(100000, 999999).toString();
 }
 
 // Send OTP email
-async function sendOtpEmail(email, otp) {
+async function sendOtpEmail(email, otp , subject , text) {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: "Your OTP Code",
-    text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
+    subject: subject,
+    text: text,
   };
   await transporter.sendMail(mailOptions);
 }
@@ -42,7 +45,7 @@ async function requestOtp(req, res) {
     process.env.JWT_SECRET
   );
 
-  await sendOtpEmail(email, otp);
+  await sendOtpEmail(email, otp, "Your OTP Code", `Your OTP code is ${otp}. It will expire in 5 minutes.`);
   res.json({ message: "OTP sent to email", token });
 }
 
@@ -76,12 +79,12 @@ async function resendOtp(req, res) {
     process.env.JWT_SECRET
   );
 
-  await sendOtpEmail(email, otp);
+  await sendOtpEmail(email, otp , "Your OTP Code", `Your OTP code is ${otp}. It will expire in 5 minutes.`);
   res.json({ message: "New OTP sent to email", token });
 }
 
 // Check OTP status endpoint
-function checkOtpStatus(req, res) {
+async function checkOtpStatus(req, res) {
   const { token } = req.query;
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -94,4 +97,39 @@ function checkOtpStatus(req, res) {
   }
 }
 
-module.exports = { requestOtp, verifyOtp, resendOtp, checkOtpStatus };
+// Generate and send new password endpoint
+async function generatePassword() {
+  var length = 8,
+      charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+      retVal = "";
+  for (var i = 0, n = charset.length; i < length; ++i) {
+      retVal += charset.charAt(Math.floor(Math.random() * n));
+  }
+  return retVal;
+}
+async function forgetPassword(req, res) {
+  const { email } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const otp = await generatePassword();
+
+  const hashedPassword = await bcryptPassword.hash(otp, 10);
+  await prisma.user.update({
+    where: { email },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  await sendOtpEmail(email, otp , "Your new password", `Your new password is ${otp}.`);
+
+  return res.status(200).json({ message: "new password sent to mail" });
+}
+module.exports = { requestOtp, verifyOtp, resendOtp, checkOtpStatus , forgetPassword};
