@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router";
 
 function EmailVerification() {
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       // Send OTP request
-      await axios.post('/otp/verifyemail', { email });
-      
+      await axios.post("/otp/verifyemail", { email });
+
       // Verify OTP
-      const response = await axios.post('/otp/verifyotp', { email, otp });
-      
+      const response = await axios.post("/otp/verifyotp", { email, otp });
+
       if (response.data.success) {
-        navigate('/registerIndividual');
+        navigate("/registerIndividual");
       } else {
-        alert('Invalid OTP');
+        alert("Invalid OTP");
       }
     } catch (error) {
       console.error(error);
