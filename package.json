@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.js",
-    "start": "node server"
+    "start": "node server",
+    "prettier": "prettier --check '*.{js,jsx,ts,tsx,css}'",
+    "prettier:fix": "prettier --write '*.{js,jsx,ts,tsx,css}'"
   },
   "keywords": [],
   "author": "",
@@ -24,5 +26,8 @@
     "nodemailer": "^6.9.14",
     "nodemon": "^3.1.4",
     "otp-generator": "^4.0.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
   }
 }
