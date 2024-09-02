@@ -3,7 +3,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 const cookieParser = require("cookie-parser");
 const express = require("express");
-const cors = require("cors");
 const adminRoute = require("./routes/admin");
 const authRoute = require("./routes/auth");
 const otpService = require("./routes/otp");
