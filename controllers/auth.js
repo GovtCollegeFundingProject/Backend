@@ -2,7 +2,14 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const registerIndividual = async (req, res) => {
+const { errorHandler } = require("../middlewares/error.js");
+
+const findMissingFields = (requiredFields, fields) => {
+  const missingFields = requiredFields.filter((field) => !fields[field]);
+
+  return missingFields;
+};
+const registerIndividual = async (req, res, next) => {
   const {
     email,
     password,
@@ -20,6 +27,34 @@ const registerIndividual = async (req, res) => {
 
   try {
     // Save user details in the database
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (user) {
+      return next(errorHandler(401, "User already exists !"));
+    }
+    const missingFields = findMissingFields(
+      [
+        "email",
+        "password",
+        "role",
+        "phoneNumber",
+        "whatsappCompatible",
+        "taxExemptionRequired",
+        "anonymous",
+        "salutation",
+        "name",
+      ],
+      req.body
+    );
+    if (missingFields.length > 0) {
+      return next(
+        errorHandler(
+          400,
+          `Missing required fields: ${missingFields.join(", ")}`
+        )
+      );
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await prisma.user.create({
       data: {
@@ -53,7 +88,7 @@ const registerIndividual = async (req, res) => {
     console.log("User created", newUser, individualUser);
   } catch (error) {
     console.log(error);
-    res.status(400).redirect("/login");
+    next(error);
   }
 };
 
@@ -74,6 +109,37 @@ const registerCompany = async (req, res) => {
   } = req.body;
 
   try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (user) {
+      return next(errorHandler(401, "User already exists !"));
+    }
+    const missingFields = findMissingFields(
+      [
+        "email",
+        "password",
+        "role",
+        "phoneNumber",
+        "whatsappCompatible",
+        "taxExemptionRequired",
+        "anonymous",
+        "salutation",
+        "name",
+        "companyID",
+        "pan",
+        "contactPersonName",
+      ],
+      req.body
+    );
+    if (missingFields.length > 0) {
+      return next(
+        errorHandler(
+          400,
+          `Missing required fields: ${missingFields.join(", ")}`
+        )
+      );
+    }
     // Save user details in the database
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await prisma.user.create({
@@ -106,11 +172,11 @@ const registerCompany = async (req, res) => {
     console.log("User created", newUser, companyUser);
   } catch (error) {
     console.log(error);
-    res.status(400).redirect("/login");
+    next(error);
   }
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -123,11 +189,11 @@ const login = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return next(errorHandler(404, "User Not Found !!"));
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid password" });
+      return next(errorHandler(401, "Invalid Password !!"));
     }
     const token = jwt.sign(
       { userId: user.email, role: user.role },
@@ -150,7 +216,7 @@ const login = async (req, res) => {
     console.log("User logged in");
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ error: "Something went wrong" });
+    next(error);
   }
 };
 

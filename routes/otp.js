@@ -5,13 +5,14 @@ const {
   verifyOtp,
   resendOtp,
   checkOtpStatus,
-  forgetPassword
+  forgetPassword,
 } = require("../controllers/otpService");
+const { extractEmailFromToken } = require("../middlewares/email");
 
-router.post("/request-otp", requestOtp);
-router.post("/verify-otp", verifyOtp);
-router.post("/resend-otp", resendOtp);
-router.get("/check-otp-status", checkOtpStatus);
+router.post("/request-otp", extractEmailFromToken, requestOtp);
+router.post("/verify-otp", extractEmailFromToken, verifyOtp);
+router.post("/resend-otp", extractEmailFromToken, resendOtp);
+router.get("/check-otp-status", extractEmailFromToken, checkOtpStatus);
 router.post("/forget-password", forgetPassword);
 
 module.exports = router;

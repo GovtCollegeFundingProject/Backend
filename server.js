@@ -16,6 +16,15 @@ app.use("/auth", authRoute);
 app.use("/otp", otpService);
 app.use("/user", userRoute);
 app.use("/college", collegeRouter);
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 500;
+  return res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message,
+  });
+});
 app.get("/", (req, res) => {
   res.send("<h1>Hello</h1>");
 });
