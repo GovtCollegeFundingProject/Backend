@@ -1,4 +1,3 @@
-const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -11,7 +10,15 @@ const userRoute = require("./routes/user");
 const collegeRouter = require("./routes/collegeRouter");
 const PORT = 3000 || process.env.PORT;
 const app = express();
-const prisma = new PrismaClient();
+const allowedDomain = process.env.CLIENT || "http://localhost:5173";
+
+const corsOptions = {
+  origin: allowedDomain,
+  optionsSuccessStatus: 200,
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
