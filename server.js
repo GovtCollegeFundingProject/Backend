@@ -1,7 +1,10 @@
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
+const dotenv = require("dotenv");
+dotenv.config();
 const cookieParser = require("cookie-parser");
 const express = require("express");
+const adminRoute = require("./routes/admin");
 const authRoute = require("./routes/auth");
 const otpService = require("./routes/otp");
 const userRoute = require("./routes/user");
@@ -12,6 +15,7 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
+app.use("/admin", adminRoute);
 app.use("/auth", authRoute);
 app.use("/otp", otpService);
 app.use("/user", userRoute);
