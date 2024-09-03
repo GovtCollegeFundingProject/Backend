@@ -21,7 +21,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+// app.use(cors());
 app.use("/admin", adminRoute);
 app.use("/auth", authRoute);
 app.use("/otp", otpService);

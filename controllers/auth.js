@@ -204,13 +204,7 @@ const login = async (req, res, next) => {
     res.status(200).json({
       message: "Login successful",
       token,
-      user: {
-        email: user.email,
-        role: user.role,
-        phoneNumber: user.phoneNumber,
-        whatsappCompatible: user.whatsappCompatible,
-        anonymous: user.anonymous,
-      },
+      user,
     });
 
     console.log("User logged in");
