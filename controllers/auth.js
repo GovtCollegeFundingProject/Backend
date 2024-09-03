@@ -199,6 +199,28 @@ const login = async (req, res, next) => {
       { userId: user.email, role: user.role },
       process.env.JWT_SECRET
     );
+    if (user.role === "INDIVIDUAL") {
+      const individualData = await prisma.individual.findUnique({
+        where: { email },
+      });
+
+      res.status(200).json({
+        message: "Login successful",
+        token,
+        user,
+        individualData,
+      });
+    } else if (user.role === "COMPANY") {
+      const companyData = await prisma.company.findUnique({
+        where: { email },
+      });
+      res.status(200).json({
+        message: "Login successful",
+        token,
+        user,
+        companyData,
+      });
+    }
 
     // Send response with the token or user info
     res.status(200).json({
