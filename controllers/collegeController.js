@@ -16,5 +16,26 @@ async function getColleges(req, res, next) {
     next(err);
   }
 }
+const getCollegesByDistrict = async (req, res) => {
+  const { district } = req.params;
+  console.log(district);
+  try {
+    const colleges = await prisma.college.findMany({
+      where: {
+        district: district,
+      },
+    });
 
-module.exports = { getColleges };
+    if (colleges.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No colleges found in this district." });
+    }
+
+    return res.status(200).json(colleges);
+  } catch (error) {
+    console.error("Error fetching colleges by district:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+module.exports = { getColleges, getCollegesByDistrict };
