@@ -23,7 +23,7 @@ const adminlogin = async (req, res) => {
     if (user.role === "ADMIN") {
       const token = jwt.sign(
         { userId: user.email, role: user.role },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET_ADMIN
       );
 
       // Send response with the token or user info
@@ -52,13 +52,15 @@ const getAdminPanelData = async (req, res) => {
 
   if (type === "general") {
     transactions = await prisma.transaction.findMany({
-      where: { type: "general" },
-      orderBy: sort === "time" ? { date: "desc" } : { amount: "desc" },
+      where: { collegeType: "GENERAL" },
+      orderBy:
+        sort === "time" ? { transactionTime: "desc" } : { amount: "desc" },
     });
   } else if (type === "collegeSpecific") {
     transactions = await prisma.transaction.findMany({
-      where: { type: "collegeSpecific" },
-      orderBy: sort === "time" ? { date: "desc" } : { amount: "desc" },
+      where: { collegeType: "SPECIFIC" },
+      orderBy:
+        sort === "time" ? { transactionTime: "desc" } : { amount: "desc" },
     });
   }
 

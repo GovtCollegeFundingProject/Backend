@@ -82,17 +82,15 @@ const registerIndividual = async (req, res, next) => {
 
     res.status(201).send({
       message: "User registered successfully",
-      user: newUser,
       individualUser,
     });
-    console.log("User created", newUser, individualUser);
   } catch (error) {
     console.log(error);
     next(error);
   }
 };
 
-const registerCompany = async (req, res) => {
+const registerCompany = async (req, res, next) => {
   const {
     email,
     password,
@@ -167,8 +165,7 @@ const registerCompany = async (req, res) => {
 
     res
       .status(201)
-      .send({ message: "User registered successfully", user: newUser });
-    console.log("User created", newUser, companyUser);
+      .send({ message: "User registered successfully", companyUser });
   } catch (error) {
     console.log(error);
     next(error);
@@ -206,7 +203,7 @@ const login = async (req, res, next) => {
       res.status(200).json({
         message: "Login successful",
         token,
-        user,
+        userName: user.name,
         individualData,
       });
     } else if (user.role === "COMPANY") {
@@ -216,7 +213,7 @@ const login = async (req, res, next) => {
       res.status(200).json({
         message: "Login successful",
         token,
-        user,
+        userName: user.name,
         companyData,
       });
     }

@@ -6,7 +6,6 @@ const editProfile = async (req, res) => {
     const {
       taxExemptionRequired,
       anonymous,
-      aadhar,
       pan,
       salutation,
       name,
