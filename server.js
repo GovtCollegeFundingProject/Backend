@@ -8,15 +8,16 @@ const authRoute = require("./routes/auth");
 const otpService = require("./routes/otp");
 const userRoute = require("./routes/user");
 const collegeRouter = require("./routes/collegeRouter");
-const PORT = 3000 || process.env.PORT;
+const PORT = process.env.PORTT || 3000;
 const app = express();
-const allowedDomain = process.env.CLIENT || "http://localhost:5173";
+const allowedDomain = process.env.CLIENT_URL || "http://localhost:5173";
 
 const corsOptions = {
   origin: allowedDomain,
   optionsSuccessStatus: 200,
   credentials: true,
 };
+console.log(allowedDomain);
 
 app.use(cors(corsOptions));
 app.use(express.json());
