@@ -32,7 +32,6 @@ const editProfile = async (req, res) => {
     await prisma.individual.update({
       where: { email },
       data: {
-        aadhar,
         pan,
         salutation,
         name,

@@ -23,7 +23,7 @@ const adminlogin = async (req, res) => {
     if (user.role === "ADMIN") {
       const token = jwt.sign(
         { userId: user.email, role: user.role },
-        process.env.JWT_SECRET_ADMIN
+        process.env.JWT_SECRET
       );
 
       // Send response with the token or user info

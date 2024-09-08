@@ -173,6 +173,66 @@ const registerCompany = async (req, res, next) => {
   }
 };
 
+// const login = async (req, res, next) => {
+//   try {
+//     const { email, password } = req.body;
+//     if (!email || !password) {
+//       return res
+//         .status(400)
+//         .json({ error: "Please provide both email and password" });
+//     }
+//     const user = await prisma.user.findUnique({
+//       where: { email },
+//     });
+
+//     if (!user) {
+//       return next(errorHandler(404, "User Not Found !!"));
+//     }
+//     const isPasswordValid = await bcrypt.compare(password, user.password);
+//     if (!isPasswordValid) {
+//       return next(errorHandler(401, "Invalid Password !!"));
+//     }
+//     const token = jwt.sign(
+//       { userId: user.email, role: user.role },
+//       process.env.JWT_SECRET
+//     );
+//     if (user.role === "INDIVIDUAL") {
+//       const individualData = await prisma.individual.findUnique({
+//         where: { email },
+//       });
+
+//       res.status(200).json({
+//         message: "Login successful",
+//         token,
+//         userName: user.name,
+//         individualData,
+//       });
+//     } else if (user.role === "COMPANY") {
+//       const companyData = await prisma.company.findUnique({
+//         where: { email },
+//       });
+//       res.status(200).json({
+//         message: "Login successful",
+//         token,
+//         userName: user.name,
+//         companyData,
+//       });
+//     }
+
+//     // Send response with the token or user info
+//     res.status(200).json({
+//       message: "Login successful",
+//       token,
+//       user,
+//     });
+
+//     console.log("User logged in");
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     next(error);
+//   }
+// };
+
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -181,6 +241,7 @@ const login = async (req, res, next) => {
         .status(400)
         .json({ error: "Please provide both email and password" });
     }
+
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -188,43 +249,49 @@ const login = async (req, res, next) => {
     if (!user) {
       return next(errorHandler(404, "User Not Found !!"));
     }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return next(errorHandler(401, "Invalid Password !!"));
     }
+
     const token = jwt.sign(
       { userId: user.email, role: user.role },
       process.env.JWT_SECRET
     );
+
+    // Prepare response based on role
+    let userData = {};
     if (user.role === "INDIVIDUAL") {
       const individualData = await prisma.individual.findUnique({
         where: { email },
       });
-
-      res.status(200).json({
+      userData = {
         message: "Login successful",
         token,
         userName: user.name,
         individualData,
-      });
+      };
     } else if (user.role === "COMPANY") {
       const companyData = await prisma.company.findUnique({
         where: { email },
       });
-      res.status(200).json({
+      userData = {
         message: "Login successful",
         token,
         userName: user.name,
         companyData,
-      });
+      };
+    } else {
+      userData = {
+        message: "Login successful",
+        token,
+        user,
+      };
     }
 
-    // Send response with the token or user info
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      user,
-    });
+    // Send the final response
+    res.status(200).json(userData);
 
     console.log("User logged in");
   } catch (error) {
