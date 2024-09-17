@@ -300,4 +300,27 @@ const login = async (req, res, next) => {
   }
 };
 
-module.exports = { registerIndividual, registerCompany, login };
+// Controller function to get total amount of transactions
+const getTotalTransactionAmount = async (req, res, next) => {
+  try {
+    const totalAmount = await prisma.transaction.aggregate({
+      _sum: {
+        amount: true,
+      },
+    });
+
+    res.status(200).json({
+      totalAmount: totalAmount._sum.amount || 0, // Return 0 if no transactions
+    });
+  } catch (error) {
+    console.error("Error fetching total transaction amount:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports = {
+  registerIndividual,
+  registerCompany,
+  login,
+  getTotalTransactionAmount,
+};
